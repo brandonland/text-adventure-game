@@ -1,2 +1,5 @@
-# untitled-text-adventure
-A text adventure written in Zig. This is a learning project—I'm new to Zig and game dev.
+# Untitled Text Adventure Game
+
+A text adventure written in Zig.
+
+This is a learning project—I am very new to Zig, low/systems-level languages, and game development in general. 
