@@ -1,2 +1,2 @@
-# text-adventure-game
-A text adventure written in Zig (as a learning project and for fun)
+# untitled-text-adventure
+A text adventure written in Zig. This is a learning project—I'm new to Zig and game dev.
