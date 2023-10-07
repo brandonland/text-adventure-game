@@ -24,12 +24,20 @@ var conf_flags: raylib.ConfigFlags = raylib.ConfigFlags{};
 
 // NOTE: One extra space required for null terminator char '\0'
 var uinput = [_]u8{0} ** (max_input_chars + 1);
-var captured_input: []u8 = undefined;
 
 var font: raylib.Font = undefined;
 var font_vec: raylib.Vector2 = undefined;
 var vec_cursor: raylib.Vector2 = undefined;
 var new_vec_cursor: *raylib.Vector2 = undefined;
+
+const UserInput = struct {
+    const Self = @This();
+    str: []u8,
+
+    pub fn reset(self: *Self) void {
+        self.str = "";
+    }
+};
 
 pub fn main() !void {
     conf_flags.FLAG_WINDOW_RESIZABLE = true;
@@ -57,13 +65,16 @@ pub fn main() !void {
 
     raylib.SetExitKey(.KEY_NULL);
 
+    //var user_input = UserInput{ .str = &[_]u8{0} ** (max_input_chars + 1) };
+    var user_input = "";
+
     while (!raylib.WindowShouldClose()) {
         //---------------------------------------------------------------------
         // Update
         //---------------------------------------------------------------------
-        var buf: [4096]u8 = undefined;
-        var fba = std.heap.FixedBufferAllocator.init(&buf);
-        _ = fba;
+        //var buf: [4096]u8 = undefined;
+        //var fba = std.heap.FixedBufferAllocator.init(&buf);
+        //_ = fba;
 
         var key = raylib.GetCharPressed();
 
@@ -106,8 +117,13 @@ pub fn main() !void {
 
         if (raylib.IsKeyPressed(.KEY_ENTER)) {
             frames_counter = 0;
-            captured_input = @as([]u8, &uinput);
-            uinput = [_]u8{0} ** (max_input_chars + 1);
+            //user_input = uinput;
+            std.debug.print("You pressed Enter.\n", .{});
+            std.debug.print("User input: {s}", .{uinput});
+            letter_count = 0;
+            uinput[letter_count] = 0;
+            //std.debug.print("You pressed enter.\nCaptured input is: {s}", .{captured_input});
+            //uinput = [_]u8{0} ** (max_input_chars + 1);
         }
 
         //---------------------------------------------------------------------
@@ -126,6 +142,7 @@ pub fn main() !void {
         //raylib.DrawTextEx("");
         //
 
+        // This is the actual rectangle of the text input.
         raylib.DrawRectangleRec(textbox, raylib.DARKGRAY);
         raylib.DrawRectangleLines(
             @as(i32, @intFromFloat(textbox.x)),
@@ -135,6 +152,7 @@ pub fn main() !void {
             raylib.BLACK,
         );
 
+        // This is the text the user actually types in.
         raylib.DrawText(
             @as([*:0]u8, @ptrCast(&uinput)),
             @as(c_int, @intFromFloat(textbox.x)) + 5,
@@ -156,6 +174,17 @@ pub fn main() !void {
             }
         } else {
             raylib.DrawText("You've reached the character limit.", 230, 300, 20, raylib.GRAY);
+        }
+
+        // Check if any input was captured. If so, do something with it,
+        // then reset captured_input.
+        if (user_input.len > 0) {
+            //raylib.DrawText(
+            //    "Captured input: " ++ captured_input,
+
+            //);
+
+            std.debug.print("captured input: {s}", .{user_input});
         }
 
         //_ = raygui.GuiTextBox(textbox_rect, textbox_text, 256, textBoxEditMode);
