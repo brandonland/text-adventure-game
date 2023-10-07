@@ -7,6 +7,9 @@ const print = std.debug.print;
 const raylib = @import("raylib");
 //const raygui = @import("raygui");
 
+const game = @import("game.zig");
+const map = @import("map.zig");
+
 const screen_width: i32 = 800;
 const screen_height: i32 = 450;
 const max_input_chars: usize = 420;
@@ -118,10 +121,14 @@ pub fn main() !void {
         if (raylib.IsKeyPressed(.KEY_ENTER)) {
             frames_counter = 0;
             //user_input = uinput;
-            std.debug.print("You pressed Enter.\n", .{});
-            std.debug.print("User input: {s}", .{uinput});
+            std.debug.print("You pressed Enter.\n\n", .{});
+            std.debug.print("User input: {s}\n", .{uinput});
             letter_count = 0;
             uinput[letter_count] = 0;
+            for (uinput, 0..) |s, i| {
+                _ = s;
+                uinput[i] = 0; // write zeros
+            }
             //std.debug.print("You pressed enter.\nCaptured input is: {s}", .{captured_input});
             //uinput = [_]u8{0} ** (max_input_chars + 1);
         }
