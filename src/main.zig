@@ -130,7 +130,6 @@ pub fn main() !void {
                 uinput[i] = 0; // write zeros
             }
             //std.debug.print("You pressed enter.\nCaptured input is: {s}", .{captured_input});
-            //uinput = [_]u8{0} ** (max_input_chars + 1);
         }
 
         //---------------------------------------------------------------------
@@ -145,9 +144,10 @@ pub fn main() !void {
 
         raylib.ClearBackground(raylib.BLACK);
 
-        raylib.DrawText("Hello, World!", 240, 140, 20, raylib.GRAY);
+        //raylib.DrawText("Hello, World!", 5, 10, 20, raylib.GRAY);
         //raylib.DrawTextEx("");
         //
+        map.rooms[0].drawRoomDesc();
 
         // This is the actual rectangle of the text input.
         raylib.DrawRectangleRec(textbox, raylib.DARKGRAY);
