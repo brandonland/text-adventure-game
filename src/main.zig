@@ -28,10 +28,8 @@ var conf_flags: raylib.ConfigFlags = raylib.ConfigFlags{};
 // NOTE: One extra space required for null terminator char '\0'
 var uinput = [_]u8{0} ** (max_input_chars + 1);
 
-var font: raylib.Font = undefined;
-var font_vec: raylib.Vector2 = undefined;
 var vec_cursor: raylib.Vector2 = undefined;
-var new_vec_cursor: *raylib.Vector2 = undefined;
+var new_vec_cursor: raylib.Vector2 = undefined;
 
 const UserInput = struct {
     const Self = @This();
@@ -42,6 +40,47 @@ const UserInput = struct {
     }
 };
 
+const CmdPayload = struct {
+    //input: ?[][]const u8 = null,
+    input: *std.mem.TokenIterator(u8, .any),
+    player: ?*PlayerState = null,
+};
+
+const ItemType = enum {
+    basic,
+    wieldable,
+    wearable,
+    consumable,
+    currency,
+};
+
+pub const Item = struct {
+    id: u16, // for retrieval
+    name: []const u8, // Printable name
+    description: []const u8,
+    stackable: bool,
+    type: ItemType,
+    degradable: bool = false,
+    weight: f16, // in lbs
+    is_key: bool = false,
+};
+
+const PlayerState = struct {
+    hp: u32,
+    room: *map.Room = &map.rooms[0],
+    //status_effects: ?[]StatusEffect,
+    inventory: ?[]const Item,
+    item_wielded: ?Item,
+    gear_equipped: ?[]Item,
+    ripperdoc_mods: ?[]Item,
+    carrying_capacity: f16,
+};
+
+pub const ItemsList = std.MultiArrayList(Item);
+
+var input_font: raylib.Font = undefined;
+var input_font_vec: raylib.Vector2 = undefined;
+
 pub fn main() !void {
     conf_flags.FLAG_WINDOW_RESIZABLE = true;
 
@@ -51,20 +90,53 @@ pub fn main() !void {
     raylib.SetConfigFlags(conf_flags);
     raylib.SetTargetFPS(60);
 
+    // Font of room descriptions
     const font_path = "assets/fonts/Fira Code Medium Nerd Font Complete Mono.ttf";
-    font = raylib.LoadFontEx(
+    map.desc_font = raylib.LoadFontEx(
         font_path, // font file
         18, // font size
         null, // codepoints - (null for default)
         0, // codepointCount (0 for default)
     );
-    font_vec = raylib.Vector2{
+
+    // Font vector of room descriptions
+    map.desc_font_vec = raylib.Vector2{
+        .x = 5.0,
+        .y = 8.0,
+    };
+
+    // Font of input textbox
+    input_font = raylib.LoadFontEx(
+        font_path,
+        24,
+        null,
+        0,
+    );
+
+    // User input font vector
+    input_font_vec = raylib.Vector2{
         .x = (textbox.x + 5.0),
         .y = (textbox.y + 8.0),
     };
 
-    new_vec_cursor = &font_vec;
-    new_vec_cursor.*.x = new_vec_cursor.*.x + 8.0;
+    // TODO: Fix cursor.
+    const input_char_width: f32 = @floatFromInt(raylib.MeasureText(
+        @as([*:0]u8, @ptrCast(&uinput)),
+        40,
+    ));
+
+    //new_vec_cursor = &input_font_vec;
+    //new_vec_cursor.*.x = new_vec_cursor.*.x + 8.0;
+    new_vec_cursor = raylib.Vector2{
+        //.x = textbox.x + raylib.MeasureTextEx(
+        //    input_font,
+        //    @as([*:0]u8, @ptrCast(&uinput)),
+        //    40,
+        //    0,
+        //).x,
+        .x = textbox.x + 16.0 + input_char_width,
+        .y = input_font_vec.y,
+    };
 
     raylib.SetExitKey(.KEY_NULL);
 
@@ -159,12 +231,21 @@ pub fn main() !void {
             raylib.BLACK,
         );
 
+        //raylib.DrawText(
+        //    @as([*:0]u8, @ptrCast(&uinput)),
+        //    @as(c_int, @intFromFloat(textbox.x)) + 5,
+        //    @as(c_int, @intFromFloat(textbox.y)) + 8,
+        //    40,
+        //    raylib.WHITE,
+        //);
+
         // This is the text the user actually types in.
-        raylib.DrawText(
+        raylib.DrawTextEx(
+            input_font,
             @as([*:0]u8, @ptrCast(&uinput)),
-            @as(c_int, @intFromFloat(textbox.x)) + 5,
-            @as(c_int, @intFromFloat(textbox.y)) + 8,
-            40,
+            input_font_vec,
+            40.0,
+            0,
             raylib.WHITE,
         );
 

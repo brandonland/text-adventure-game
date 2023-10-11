@@ -3,6 +3,7 @@ const std = @import("std");
 
 const print = std.debug.print;
 const raylib = @import("raylib");
+const main = @import("./main.zig");
 
 pub const Direction = enum { north, east, south, west, up, down };
 
@@ -59,6 +60,9 @@ pub const DoorSide = enum {
     inside,
     outside,
 };
+
+pub var desc_font: raylib.Font = undefined;
+pub var desc_font_vec: raylib.Vector2 = undefined;
 
 // Also used for state management.
 pub const Port = struct {
@@ -123,14 +127,22 @@ pub const Room = struct {
 
     // Draws room description
     pub fn drawRoomDesc(self: Self) void {
-        raylib.DrawText(
-            self.description,
-            //@as([*:0]u8, @constCast(self.description)),
-            @as(c_int, 5),
-            @as(c_int, 10),
-            18,
+        raylib.DrawTextEx(
+            desc_font,
+            @as([*:0]u8, self.description),
+            desc_font_vec,
+            18.0,
+            0,
             raylib.GRAY,
         );
+        //raylib.DrawText(
+        //    self.description,
+        //    //@as([*:0]u8, @constCast(self.description)),
+        //    @as(c_int, 5),
+        //    @as(c_int, 10),
+        //    18,
+        //    raylib.GRAY,
+        //);
     }
 };
 

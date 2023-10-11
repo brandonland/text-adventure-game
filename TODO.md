@@ -9,6 +9,8 @@
 - [ ] Reached all milestones of the first pass of this project
 
 ### Styling
-- [ ] Load custom font
+- [x] Load custom font
 - [ ] Style the text box
 
+### Bugs
+- [ ] Input blinking cursor drifts away from tail of text when typing
