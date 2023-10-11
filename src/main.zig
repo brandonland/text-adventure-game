@@ -29,7 +29,7 @@ var conf_flags: raylib.ConfigFlags = raylib.ConfigFlags{};
 var uinput = [_]u8{0} ** (max_input_chars + 1);
 
 var vec_cursor: raylib.Vector2 = undefined;
-var new_vec_cursor: raylib.Vector2 = undefined;
+var cursor_vector: raylib.Vector2 = undefined;
 
 const UserInput = struct {
     const Self = @This();
@@ -119,25 +119,6 @@ pub fn main() !void {
         .y = (textbox.y + 8.0),
     };
 
-    // TODO: Fix cursor.
-    const input_char_width: f32 = @floatFromInt(raylib.MeasureText(
-        @as([*:0]u8, @ptrCast(&uinput)),
-        40,
-    ));
-
-    //new_vec_cursor = &input_font_vec;
-    //new_vec_cursor.*.x = new_vec_cursor.*.x + 8.0;
-    new_vec_cursor = raylib.Vector2{
-        //.x = textbox.x + raylib.MeasureTextEx(
-        //    input_font,
-        //    @as([*:0]u8, @ptrCast(&uinput)),
-        //    40,
-        //    0,
-        //).x,
-        .x = textbox.x + 16.0 + input_char_width,
-        .y = input_font_vec.y,
-    };
-
     raylib.SetExitKey(.KEY_NULL);
 
     //var user_input = UserInput{ .str = &[_]u8{0} ** (max_input_chars + 1) };
@@ -173,21 +154,7 @@ pub fn main() !void {
             }
             uinput[letter_count] = 0;
         }
-        //if (raylib.IsKeyPressed(raylib.KeyboardKey.KEY_BACKSPACE)) {
-        //    if (letter_count > 0) {
-        //        letter_count -= 1;
-        //    } else {
-        //        frames_counter = 0;
-        //    }
-        //}
 
-        //frames_counter += if (raylib.IsKeyDown(raylib.KEY_SPACE)) 8 else 1;
-        //if (raylib.IsKeyDown(raylib.KeyboardKey.KEY_SPACE)) {
-        //    frames_counter += 8;
-        //} else {
-        //    frames_counter += 1;
-        //}
-        //
         frames_counter += 1;
 
         if (raylib.IsKeyPressed(.KEY_ENTER)) {
@@ -216,9 +183,6 @@ pub fn main() !void {
 
         raylib.ClearBackground(raylib.BLACK);
 
-        //raylib.DrawText("Hello, World!", 5, 10, 20, raylib.GRAY);
-        //raylib.DrawTextEx("");
-        //
         map.rooms[0].drawRoomDesc();
 
         // This is the actual rectangle of the text input.
@@ -231,14 +195,6 @@ pub fn main() !void {
             raylib.BLACK,
         );
 
-        //raylib.DrawText(
-        //    @as([*:0]u8, @ptrCast(&uinput)),
-        //    @as(c_int, @intFromFloat(textbox.x)) + 5,
-        //    @as(c_int, @intFromFloat(textbox.y)) + 8,
-        //    40,
-        //    raylib.WHITE,
-        //);
-
         // This is the text the user actually types in.
         raylib.DrawTextEx(
             input_font,
@@ -249,16 +205,35 @@ pub fn main() !void {
             raylib.WHITE,
         );
 
+        // Blinking cursor vector
+        cursor_vector = raylib.Vector2{
+            .x = textbox.x + 8.0 + raylib.MeasureTextEx(
+                input_font,
+                @as([*:0]u8, @ptrCast(&uinput)),
+                40,
+                0,
+            ).x,
+            .y = input_font_vec.y,
+        };
+
         // Blinking cursor
         if (letter_count < max_input_chars) {
             if (((frames_counter / 20) % 2) == 0) {
-                raylib.DrawText(
+                raylib.DrawTextEx(
+                    input_font,
                     "_",
-                    @as(c_int, @intFromFloat(textbox.x)) + 8 + raylib.MeasureText(@as([*:0]u8, @ptrCast(&uinput)), 40),
-                    @as(c_int, @intFromFloat(textbox.y)) + 12,
+                    cursor_vector,
                     40,
+                    0,
                     raylib.WHITE,
                 );
+                //raylib.DrawText(
+                //    "_",
+                //    @as(c_int, @intFromFloat(textbox.x)) + 8 + raylib.MeasureText(@as([*:0]u8, @ptrCast(&uinput)), 40),
+                //    @as(c_int, @intFromFloat(textbox.y)) + 12,
+                //    40,
+                //    raylib.WHITE,
+                //);
             }
         } else {
             raylib.DrawText("You've reached the character limit.", 230, 300, 20, raylib.GRAY);
