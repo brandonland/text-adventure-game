@@ -27,7 +27,7 @@ pub const Ledge = struct {
     var autolocks: bool = false; // by default, requires an item to "get down" from ledge.
     var lockable: bool = true; //
 
-    is_one_way_only: bool, // Some ledges can be jumped down but not climbed up.
+    is_one_way_only: bool = true, // Some ledges can be jumped down but not climbed up.
 };
 
 pub const Tunnel = struct {
@@ -135,14 +135,6 @@ pub const Room = struct {
             0,
             raylib.GRAY,
         );
-        //raylib.DrawText(
-        //    self.description,
-        //    //@as([*:0]u8, @constCast(self.description)),
-        //    @as(c_int, 5),
-        //    @as(c_int, 10),
-        //    18,
-        //    raylib.GRAY,
-        //);
     }
 };
 

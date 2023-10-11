@@ -108,12 +108,12 @@ pub fn main() !void {
     // Font of input textbox
     input_font = raylib.LoadFontEx(
         font_path,
-        24,
+        40,
         null,
         0,
     );
 
-    // User input font vector
+    // User input font position
     input_font_vec = raylib.Vector2{
         .x = (textbox.x + 5.0),
         .y = (textbox.y + 8.0),
