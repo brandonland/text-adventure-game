@@ -16,10 +16,11 @@ const max_input_chars: usize = 420;
 var letter_count: usize = 0;
 var frames_counter: usize = 0;
 const textbox_height = 50;
+const textbox_padding = 40;
 const textbox = raylib.Rectangle{
-    .x = 10,
+    .x = textbox_padding,
     .y = screen_height - (textbox_height + 10),
-    .width = screen_width - 20,
+    .width = screen_width - (textbox_padding * 2),
     .height = textbox_height,
 };
 
@@ -27,9 +28,6 @@ var conf_flags: raylib.ConfigFlags = raylib.ConfigFlags{};
 
 // NOTE: One extra space required for null terminator char '\0'
 var uinput = [_]u8{0} ** (max_input_chars + 1);
-
-var vec_cursor: raylib.Vector2 = undefined;
-var cursor_vector: raylib.Vector2 = undefined;
 
 const UserInput = struct {
     const Self = @This();
@@ -78,10 +76,19 @@ const PlayerState = struct {
 
 pub const ItemsList = std.MultiArrayList(Item);
 
+// Fonts
+pub const font_path = "assets/fonts/Fira Code Medium Nerd Font Complete Mono.ttf";
+
 var input_font: raylib.Font = undefined;
 var input_font_vec: raylib.Vector2 = undefined;
 
+var vec_cursor: raylib.Vector2 = undefined;
+var cursor_vector: raylib.Vector2 = undefined;
+
 pub fn main() !void {
+    //---------------------------------------------------------------------
+    // Initializations
+    //---------------------------------------------------------------------
     conf_flags.FLAG_WINDOW_RESIZABLE = true;
 
     raylib.InitWindow(screen_width, screen_height, "Text Adventure Game (working title)");
@@ -91,15 +98,14 @@ pub fn main() !void {
     raylib.SetTargetFPS(60);
 
     // Font of room descriptions
-    const font_path = "assets/fonts/Fira Code Medium Nerd Font Complete Mono.ttf";
     map.desc_font = raylib.LoadFontEx(
         font_path, // font file
         18, // font size
         null, // codepoints - (null for default)
-        0, // codepointCount (0 for default)
+        9792, //0, // codepointCount (0 for default)
     );
 
-    // Font vector of room descriptions
+    // Font position of room descriptions
     map.desc_font_vec = raylib.Vector2{
         .x = 5.0,
         .y = 8.0,
@@ -119,10 +125,28 @@ pub fn main() !void {
         .y = (textbox.y + 8.0),
     };
 
+    // Prompt symbols: E0B0 to E0D4
+    const prompt_symbol_codepoints = [_]i32{
+        0xE0B0, 0xE0B1, 0xE0B2, 0xE0B3, 0xE0B4, 0xE0B5, 0xE0B6, 0xE0B7,
+        0xE0B8, 0xE0B9, 0xE0BA, 0xE0BB, 0xE0BC, 0xE0BD, 0xE0BE, 0xE0BF,
+        0xE0C0, 0xE0C1, 0xE0C2, 0xE0C3, 0xE0C4, 0xE0C5, 0xE0C6, 0xE0C7,
+        0xE0C8, 0xE0CA, 0xE0CC, 0xE0CD, 0xE0CE, 0xE0CF, 0xE0D0, 0xE0D1,
+        0xE0D2, 0xE0D4,
+    };
+    const prompt_symbol_codepoints_ptr: [*]const i32 = &prompt_symbol_codepoints;
+    const prompt_symbol_font = raylib.LoadFontEx(
+        font_path,
+        40,
+        @as([*]i32, @ptrCast(@constCast(prompt_symbol_codepoints_ptr))),
+        34,
+    );
+
     raylib.SetExitKey(.KEY_NULL);
 
     //var user_input = UserInput{ .str = &[_]u8{0} ** (max_input_chars + 1) };
     var user_input = "";
+
+    raylib.SetTextLineSpacing(20);
 
     while (!raylib.WindowShouldClose()) {
         //---------------------------------------------------------------------
@@ -186,13 +210,13 @@ pub fn main() !void {
         map.rooms[0].drawRoomDesc();
 
         // This is the actual rectangle of the text input.
-        raylib.DrawRectangleRec(textbox, raylib.DARKGRAY);
+        raylib.DrawRectangleRec(textbox, raylib.BLACK);
         raylib.DrawRectangleLines(
-            @as(i32, @intFromFloat(textbox.x)),
-            @as(i32, @intFromFloat(textbox.y)),
-            @as(i32, @intFromFloat(textbox.width)),
-            @as(i32, @intFromFloat(textbox.height)),
-            raylib.BLACK,
+            @as(i32, textbox.x),
+            @as(i32, textbox.y),
+            @as(i32, textbox.width),
+            @as(i32, textbox.height),
+            raylib.DARKGRAY,
         );
 
         // This is the text the user actually types in.
@@ -227,26 +251,42 @@ pub fn main() !void {
                     0,
                     raylib.WHITE,
                 );
-                //raylib.DrawText(
-                //    "_",
-                //    @as(c_int, @intFromFloat(textbox.x)) + 8 + raylib.MeasureText(@as([*:0]u8, @ptrCast(&uinput)), 40),
-                //    @as(c_int, @intFromFloat(textbox.y)) + 12,
-                //    40,
-                //    raylib.WHITE,
-                //);
             }
         } else {
             raylib.DrawText("You've reached the character limit.", 230, 300, 20, raylib.GRAY);
         }
 
+        // Experimenting with codepoints
+        const prompt_arrow_pos: raylib.Vector2 = raylib.Vector2{
+            .x = 5,
+            .y = textbox.y,
+        };
+        _ = prompt_arrow_pos;
+        _ = raylib.DrawTextCodepoint(
+            prompt_symbol_font,
+            '',
+            .{ .x = 10, .y = textbox.y + 5 },
+            40.0,
+            raylib.WHITE,
+        );
+        _ = raylib.DrawTextEx(
+            map.desc_font,
+            \\ ┌───┅┅┅───┐
+            \\ │         │
+            \\ │         │
+            \\ │         │
+            \\ │         │
+            \\ └───━━━───┘          
+        ,
+            .{ .x = 300, .y = 200 },
+            18.0,
+            0,
+            raylib.LIGHTGRAY,
+        );
+
         // Check if any input was captured. If so, do something with it,
         // then reset captured_input.
         if (user_input.len > 0) {
-            //raylib.DrawText(
-            //    "Captured input: " ++ captured_input,
-
-            //);
-
             std.debug.print("captured input: {s}", .{user_input});
         }
 
