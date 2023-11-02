@@ -11,8 +11,8 @@ This is a learning project—I am very new to Zig, low/systems-level languages, 
     - [GNU Linux](https://github.com/raysan5/raylib/wiki/Working-on-GNU-Linux)
     - [Windows](https://github.com/raysan5/raylib/wiki/Working-on-Windows)
     - [macOS](https://github.com/raysan5/raylib/wiki/Working-on-macOS)
-3. Clone the project and run:
-    Clone: `git clone https://github.com/brandonland/text-adventure-game.git`
-    cd into directory: `cd text-adventure-game`
-    Fetch submodules: `git submodule update --init --recursive`
-    Run: `zig build run`
+3. Once you've done the above, clone the project and run:
+    1. Clone: `git clone https://github.com/brandonland/text-adventure-game.git`
+    2. cd into directory: `cd text-adventure-game`
+    3. Fetch submodules: `git submodule update --init --recursive`
+    4. Run: `zig build run`
